@@ -5,9 +5,6 @@ using UnityEngine;
 using UnityEngine.Audio;
 using DG.Tweening;
 using System.Collections;
-using UnityEngine.SceneManagement;
-
-using Random = UnityEngine.Random;
 
 namespace Utils
 {
@@ -34,7 +31,7 @@ namespace Utils
 		[Header("GameObjects")]
 		[SerializeField] private AudioSource musicSource1;
 		[SerializeField] private AudioSource musicSource2;
-		[SerializeField] private GameObject sfxGameObject;
+
 		[Header("Unity Sounds")]
         [SerializeField] List<Sound> musics;
         [SerializeField] List<Sound> nappes;
