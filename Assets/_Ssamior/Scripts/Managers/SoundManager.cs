@@ -9,7 +9,7 @@ using System.Collections;
 namespace Utils
 {
     [RequireComponent(typeof(AudioListener))]
-    public class SoundManager : MonoBehaviour
+    public class SoundManager : Singleton<SoundManager>
 	{
 		public enum GroupType
 		{
@@ -20,7 +20,6 @@ namespace Utils
             Master = 100,
 		}
 
-		public static SoundManager Instance;
         public AudioListener GlobalListener { get; private set; }
 		//public bool toogleMusic, toggleEffects;
 
@@ -53,15 +52,9 @@ namespace Utils
 		private bool isFirst = true;
         private readonly Dictionary<string, int> currentMusicSamples = new();
 
-        void Awake()
+        public override void Awake()
 		{
-			if (Instance != null && Instance != this)
-			{
-				Destroy(gameObject);
-				return;
-			}
-			Instance = this;
-			DontDestroyOnLoad(gameObject);
+			base.Awake();
 
 			//Ordering sounds
 			sounds.Clear();
