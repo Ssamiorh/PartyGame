@@ -14,4 +14,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/_Ssamior/Scenes/LobbyScene.unity
     guid: 175d3b63ac1f69541bc4984a32420745
+  - enabled: 1
+    path: Assets/_Ssamior/Scenes/MiniGames/MiniGame_TagPlatformer.unity
+    guid: 903ea7b1ac6d50446a74d2f9fa747899
   m_configObjects: {}

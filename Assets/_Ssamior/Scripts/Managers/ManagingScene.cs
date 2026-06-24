@@ -7,6 +7,6 @@ public class ManagingScene : MonoBehaviour
     void Start()
     {
         DontDestroyOnLoad(this);
-        SceneManager.LoadSceneAsync(GameDataRegistry.MainMenuIndex);
+        SceneManager.LoadSceneAsync(GameDataRegistry.MainMenuSceneName);
     }
 }

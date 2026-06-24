@@ -1,4 +1,3 @@
-using System.IO;
 using System.Threading.Tasks;
 using Unity.Netcode;
 using Unity.Services.Authentication;
@@ -15,7 +14,7 @@ namespace Game
     /// </summary>
     public class SessionManager : Singleton<SessionManager>
     {
-        private const int MaxPlayers = 8;
+        private const int MaxPlayers = 4;
 
         /// <summary>Raised whenever the active session reference changes.</summary>
         public event System.Action SessionChanged;
@@ -51,7 +50,7 @@ namespace Game
 
             // Host loads the lobby scene through NGO; joining clients sync to it automatically.
             NetworkManager.Singleton.SceneManager.LoadScene(
-                GetSceneName(GameDataRegistry.LobbyIndex), LoadSceneMode.Single);
+                GameDataRegistry.LobbySceneName, LoadSceneMode.Single);
 
             return _session.Code;
         }
@@ -66,6 +65,30 @@ namespace Game
             Session = await MultiplayerService.Instance.JoinSessionByCodeAsync(code);
         }
 
+        /// <summary>
+        /// Host-only: load a minigame scene over the network for every player.
+        /// </summary>
+        public void StartMiniGame(E_MiniGame miniGame)
+        {
+            if (NetworkManager.Singleton == null || !NetworkManager.Singleton.IsServer)
+                return;
+
+            NetworkManager.Singleton.SceneManager.LoadScene(
+                GameDataRegistry.GetMiniGameSceneName(miniGame), LoadSceneMode.Single);
+        }
+
+        /// <summary>
+        /// Host-only: bring every player back to the lobby scene over the network.
+        /// </summary>
+        public void ReturnToLobby()
+        {
+            if (NetworkManager.Singleton == null || !NetworkManager.Singleton.IsServer)
+                return;
+
+            NetworkManager.Singleton.SceneManager.LoadScene(
+                GameDataRegistry.LobbySceneName, LoadSceneMode.Single);
+        }
+
         private static async Task EnsureSignedInAsync()
         {
             if (UnityServices.State != ServicesInitializationState.Initialized)
@@ -73,11 +96,6 @@ namespace Game
 
             if (!AuthenticationService.Instance.IsSignedIn)
                 await AuthenticationService.Instance.SignInAnonymouslyAsync();
-        }
-
-        private static string GetSceneName(int buildIndex)
-        {
-            return Path.GetFileNameWithoutExtension(SceneUtility.GetScenePathByBuildIndex(buildIndex));
         }
     }
 }
