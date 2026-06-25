@@ -14,6 +14,9 @@ namespace Utils
         public const string sfxVolume_PlayerPrefKey = "sfxVol";
         public const string uiVolume_PlayerPrefKey = "uiVol";
 
+        //Player
+        public const string playerColor_PlayerPrefKey = "playerColor";
+
         /// <summary>
         /// Use saved PlayerPrefs to update all settings
         /// </summary>

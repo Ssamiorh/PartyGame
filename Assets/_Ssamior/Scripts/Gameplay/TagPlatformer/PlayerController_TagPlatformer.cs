@@ -1,6 +1,6 @@
-using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
+using Utils;
 
 namespace Game.TagPlatformer
 {
@@ -21,18 +21,17 @@ namespace Game.TagPlatformer
         [Tooltip("Speed multiplier applied while this player is tagged.")]
         [SerializeField] private float _taggedSpeedMultiplier = 1.2f;
         [Tooltip("Visual shown above the player's head while it is tagged.")]
-        [SerializeField] private GameObject _tagVisual;
+        [SerializeField] private SpriteRenderer _tagVisual;
         [Tooltip("Seconds a freshly tagged player cannot pass the tag back (prevents instant ping-pong).")]
         [SerializeField] private float _tagImmunityDuration = 0.5f;
         [Tooltip("Layer(s) other players are on, so non-player collisions are skipped cheaply.")]
         [SerializeField] private LayerMask _playerLayer;
 
         [Header("Ground check")]
-        [SerializeField] private Transform _groundCheck;
-        [SerializeField] private float _groundCheckRadius = 0.15f;
+        [Tooltip("Layer(s) that count as ground. A trigger collider on this prefab tracks overlaps with these.")]
         [SerializeField] private LayerMask _groundLayer;
-        // Reused buffer for the ground overlap query so it doesn't allocate per frame.
-        private readonly List<Collider2D> _groundHits = new();
+        // Number of ground colliders currently overlapping the foot trigger collider.
+        private int _groundContactCount;
 
         [SerializeField] private Rigidbody2D _rb;
         [SerializeField] private Animator _animator;
@@ -53,6 +52,10 @@ namespace Game.TagPlatformer
         // does not replicate SpriteRenderer.flipX).
         private readonly NetworkVariable<bool> _facingLeft = new(writePerm: NetworkVariableWritePermission.Owner);
 
+        // Owner-written color index (into PlayerColors), mirrored to every peer to tint
+        // this player's sprites with their lobby-picked color.
+        private readonly NetworkVariable<int> _colorIndex = new(writePerm: NetworkVariableWritePermission.Owner);
+
         // ServerTime until which this player cannot pass the tag on again. Server-only.
         private double _tagImmunityEndTime;
 
@@ -68,6 +71,13 @@ namespace Game.TagPlatformer
             _facingLeft.OnValueChanged += HandleFacingChanged;
             UpdateFacing(_facingLeft.Value);
 
+            _colorIndex.OnValueChanged += HandleColorChanged;
+            // Owner publishes its lobby-picked color; everyone (owner included) applies it.
+            if (IsOwner)
+                _colorIndex.Value = PlayerColors.Clamp(
+                    PlayerPrefs.GetInt(PreferencesManager.playerColor_PlayerPrefKey, 0));
+            ApplyColor(_colorIndex.Value);
+
             _miniGame = FindAnyObjectByType<MiniGameController>();
             _miniGame.GameFinished += HandleGameFinished;
         }
@@ -76,6 +86,7 @@ namespace Game.TagPlatformer
         {
             _isTagged.OnValueChanged -= HandleTaggedChanged;
             _facingLeft.OnValueChanged -= HandleFacingChanged;
+            _colorIndex.OnValueChanged -= HandleColorChanged;
 
             _miniGame.GameFinished -= HandleGameFinished;
         }
@@ -95,7 +106,7 @@ namespace Game.TagPlatformer
 
         private void UpdateTagVisual(bool tagged)
         {
-            _tagVisual.SetActive(tagged);
+            _tagVisual.gameObject.SetActive(tagged);
         }
 
         private void HandleFacingChanged(bool previous, bool current) => UpdateFacing(current);
@@ -103,6 +114,15 @@ namespace Game.TagPlatformer
         private void UpdateFacing(bool facingLeft)
         {
             _spriteRenderer.flipX = !facingLeft;
+        }
+
+        private void HandleColorChanged(int previous, int current) => ApplyColor(current);
+
+        private void ApplyColor(int colorIndex)
+        {
+            Color color = PlayerColors.ColorAt(colorIndex);
+            _spriteRenderer.color = color;
+            _tagVisual.color = color;
         }
 
         // Owner-only: derive facing from horizontal input (kept when idle). Only writes the
@@ -218,21 +238,28 @@ namespace Game.TagPlatformer
         {
         }
 
-        private bool IsGrounded()
+        private bool IsGrounded() => _groundContactCount > 0;
+
+        private void OnTriggerEnter2D(Collider2D other)
         {
-            ContactFilter2D filter = new() { useTriggers = false };
-            filter.SetLayerMask(_groundLayer);
-            Physics2D.OverlapCircle(_groundCheck.position, _groundCheckRadius, filter, _groundHits);
+            if (IsGroundCollider(other))
+                _groundContactCount++;
+        }
 
-            foreach (Collider2D hit in _groundHits)
-            {
-                // Ignore our own colliders (all share this player's Rigidbody2D); only
-                // ground or other players count as standable.
-                if (hit.attachedRigidbody != _rb)
-                    return true;
-            }
+        private void OnTriggerExit2D(Collider2D other)
+        {
+            if (IsGroundCollider(other))
+                _groundContactCount = Mathf.Max(0, _groundContactCount - 1);
+        }
 
-            return false;
+        // A collider on the ground layer that isn't one of our own (all our colliders
+        // share this player's Rigidbody2D).
+        private bool IsGroundCollider(Collider2D other)
+        {
+            if ((_groundLayer.value & (1 << other.gameObject.layer)) == 0)
+                return false;
+
+            return other.attachedRigidbody != _rb;
         }
     }
 }
