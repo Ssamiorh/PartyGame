@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using Game.TagPlatformer;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -6,8 +8,10 @@ namespace Game
     public class Controller_TagPlatformer : MiniGameController
     {
         [SerializeField] private NetworkObject _playerPrefab;
-        [SerializeField] private Transform _playersParent;
         [SerializeField] private Transform[] _spawnPoints;
+
+        // Server-only: every spawned player, used to pick the first one to be "it".
+        private readonly List<PlayerController_TagPlatformer> _players = new();
 
         protected override void OnGameStarted()
         {
@@ -22,6 +26,8 @@ namespace Game
                 return;
             }
 
+            _players.Clear();
+
             int index = 0;
             foreach (ulong clientId in NetworkManager.ConnectedClientsIds)
             {
@@ -29,9 +35,23 @@ namespace Game
                 NetworkObject instantiatedPlayer = NetworkManager.SpawnManager.InstantiateAndSpawn(
                     _playerPrefab, clientId, destroyWithScene: true,
                     position: spawn.position, rotation: spawn.rotation);
-                instantiatedPlayer.TrySetParent(_playersParent);
+
+                if (instantiatedPlayer.TryGetComponent(out PlayerController_TagPlatformer player))
+                    _players.Add(player);
+
                 index++;
             }
+
+            TagRandomPlayer();
+        }
+
+        // Pick one random player to start the game as "it".
+        private void TagRandomPlayer()
+        {
+            if (_players.Count == 0)
+                return;
+
+            _players[Random.Range(0, _players.Count)].SetTagged(true);
         }
 
         protected override void OnGameFinished()
