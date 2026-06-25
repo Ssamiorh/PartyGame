@@ -16,6 +16,8 @@ namespace Game.TagPlatformer
     {
         [SerializeField] private float _moveSpeed = 7f;
         [SerializeField] private float _jumpForce = 12f;
+        [Tooltip("Minimum delay between two consecutive jumps (ground or wall).")]
+        [SerializeField] private float _jumpCooldown = 0.2f;
 
         [Header("Tag")]
         [Tooltip("Speed multiplier applied while this player is tagged.")]
@@ -24,14 +26,12 @@ namespace Game.TagPlatformer
         [SerializeField] private SpriteRenderer _tagVisual;
         [Tooltip("Seconds a freshly tagged player cannot pass the tag back (prevents instant ping-pong).")]
         [SerializeField] private float _tagImmunityDuration = 0.5f;
-        [Tooltip("Layer(s) other players are on, so non-player collisions are skipped cheaply.")]
-        [SerializeField] private LayerMask _playerLayer;
 
-        [Header("Ground check")]
-        [Tooltip("Layer(s) that count as ground. A trigger collider on this prefab tracks overlaps with these.")]
-        [SerializeField] private LayerMask _groundLayer;
-        // Number of ground colliders currently overlapping the foot trigger collider.
-        private int _groundContactCount;
+        [Header("Sensors")]
+        [Tooltip("Foot trigger sensor: reports when the player is standing on ground.")]
+        [SerializeField] private TriggerSensor _groundSensor;
+        [Tooltip("Side trigger sensor: reports when the player is hugging a wall.")]
+        [SerializeField] private TriggerSensor _wallSensor;
 
         [SerializeField] private Rigidbody2D _rb;
         [SerializeField] private Animator _animator;
@@ -40,6 +40,11 @@ namespace Game.TagPlatformer
         private float _horizontalInput;
         private bool _jumpQueued;
         private bool _inputsEnabled = true;
+
+        // Jump gating: earliest time a new jump is allowed, plus the single wall jump
+        // that recharges only once the player touches the ground again.
+        private float _nextJumpTime;
+        private bool _wallJumpAvailable;
 
         // Animator parameter ids (must match the Animator Controller).
         private static readonly int SpeedHash = Animator.StringToHash("Speed");
@@ -151,8 +156,11 @@ namespace Game.TagPlatformer
             _horizontalInput = Input.GetAxisRaw("Horizontal");
             UpdateFacingFromInput();
 
-            if (Input.GetButtonDown("Jump")
-                && IsGrounded())
+            // Wall jumps recharge only by touching the ground again.
+            if (_groundSensor.IsTouching)
+                _wallJumpAvailable = true;
+
+            if (Input.GetButtonDown("Jump") && TryConsumeJump())
             {
                 _jumpQueued = true;
                 // Triggers are transient: set through NetworkAnimator so they replicate.
@@ -191,10 +199,10 @@ namespace Game.TagPlatformer
             if (!IsOwner || !_isTagged.Value)
                 return;
 
-            // Cheaply reject ground/walls/etc. before the component lookup.
-            if ((_playerLayer.value & (1 << collision.gameObject.layer)) == 0)
+            //If collision with something that is not a player
+            if(collision.rigidbody == null)
                 return;
-
+        
             PlayerController_TagPlatformer other =
                 collision.collider.GetComponentInParent<PlayerController_TagPlatformer>();
             if (other == null || other == this)
@@ -238,28 +246,24 @@ namespace Game.TagPlatformer
         {
         }
 
-        private bool IsGrounded() => _groundContactCount > 0;
-
-        private void OnTriggerEnter2D(Collider2D other)
+        // Owner-only: decide whether a jump is allowed right now and, if so, commit its
+        // side effects. A ground jump always wins when grounded; otherwise a single wall
+        // jump is allowed until the player lands again. A cooldown blocks rapid re-jumps.
+        private bool TryConsumeJump()
         {
-            if (IsGroundCollider(other))
-                _groundContactCount++;
-        }
-
-        private void OnTriggerExit2D(Collider2D other)
-        {
-            if (IsGroundCollider(other))
-                _groundContactCount = Mathf.Max(0, _groundContactCount - 1);
-        }
-
-        // A collider on the ground layer that isn't one of our own (all our colliders
-        // share this player's Rigidbody2D).
-        private bool IsGroundCollider(Collider2D other)
-        {
-            if ((_groundLayer.value & (1 << other.gameObject.layer)) == 0)
+            if (Time.time < _nextJumpTime)
                 return false;
 
-            return other.attachedRigidbody != _rb;
+            bool grounded = _groundSensor.IsTouching;
+            bool canWallJump = !grounded && _wallSensor.IsTouching && _wallJumpAvailable;
+            if (!grounded && !canWallJump)
+                return false;
+
+            if (canWallJump)
+                _wallJumpAvailable = false;
+
+            _nextJumpTime = Time.time + _jumpCooldown;
+            return true;
         }
     }
 }

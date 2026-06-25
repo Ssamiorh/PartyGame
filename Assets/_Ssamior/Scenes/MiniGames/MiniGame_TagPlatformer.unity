@@ -1730,8 +1730,8 @@ BoxCollider2D:
     adaptiveTilingThreshold: 0.5
     drawMode: 2
     adaptiveTiling: 0
-  m_AutoTiling: 1
-  m_Size: {x: 0.37, y: 1.09}
+  m_AutoTiling: 0
+  m_Size: {x: 0.37, y: 30}
   m_EdgeRadius: 0
 --- !u!212 &1196291325
 SpriteRenderer:
@@ -1868,8 +1868,8 @@ BoxCollider2D:
     adaptiveTilingThreshold: 0.5
     drawMode: 2
     adaptiveTiling: 0
-  m_AutoTiling: 1
-  m_Size: {x: 0.37, y: 1.09}
+  m_AutoTiling: 0
+  m_Size: {x: 0.37, y: 30}
   m_EdgeRadius: 0
 --- !u!212 &1200485387
 SpriteRenderer:
@@ -2359,7 +2359,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Game.Controller_TagPlatformer
   ShowTopMostFoldoutHeaderGroup: 1
-  _gameDuration: 60
+  _gameDuration: 600
   _returnToLobbyDelay: 5
   _playerPrefab: {fileID: 7829185358591424915, guid: 7584c4c608410ac42be88a828730736e, type: 3}
   _spawnPoints:
