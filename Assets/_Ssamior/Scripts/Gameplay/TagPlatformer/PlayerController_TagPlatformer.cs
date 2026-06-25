@@ -102,7 +102,7 @@ namespace Game.TagPlatformer
 
         private void UpdateFacing(bool facingLeft)
         {
-            _spriteRenderer.flipX = facingLeft;
+            _spriteRenderer.flipX = !facingLeft;
         }
 
         // Owner-only: derive facing from horizontal input (kept when idle). Only writes the

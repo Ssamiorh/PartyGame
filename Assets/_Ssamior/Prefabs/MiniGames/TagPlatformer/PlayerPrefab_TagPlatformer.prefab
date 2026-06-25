@@ -404,13 +404,14 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   _groundCheck: {fileID: 7618795269846258762}
-  _groundCheckRadius: 0.1
+  _groundCheckRadius: 0.2
   _groundLayer:
     serializedVersion: 2
     m_Bits: 448
   _rb: {fileID: 8825525548367980756}
   _animator: {fileID: 4849035862236668958}
   _networkAnimator: {fileID: 1361805139668705243}
+  _spriteRenderer: {fileID: 861673791710032651}
 --- !u!114 &6254168876215976099
 MonoBehaviour:
   m_ObjectHideFlags: 0
