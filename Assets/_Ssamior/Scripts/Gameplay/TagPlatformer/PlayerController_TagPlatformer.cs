@@ -37,6 +37,8 @@ namespace Game.TagPlatformer
         [SerializeField] private Animator _animator;
         [SerializeField] private OwnerNetworkAnimator _networkAnimator;
         [SerializeField] private SpriteRenderer _spriteRenderer;
+        [Tooltip("Separate Animator that plays the explosion when this player loses at timeout.")]
+        [SerializeField] private Animator _explosionAnimator;
         private float _horizontalInput;
         private bool _jumpQueued;
         private bool _inputsEnabled = true;
@@ -49,6 +51,7 @@ namespace Game.TagPlatformer
         // Animator parameter ids (must match the Animator Controller).
         private static readonly int SpeedHash = Animator.StringToHash("Speed");
         private static readonly int JumpHash = Animator.StringToHash("Jump");
+        private static readonly int ExplodeHash = Animator.StringToHash("Explode");
 
         // Server-authoritative tagged flag, mirrored to every peer for visuals + speed.
         private readonly NetworkVariable<bool> _isTagged = new();
@@ -241,9 +244,16 @@ namespace Game.TagPlatformer
                 Explode();
         }
 
-        /// <summary>Reaction when the tagged player loses at timeout. TODO: implement the explosion.</summary>
+        /// <summary>
+        /// Reaction when the tagged player loses at timeout. Runs on every peer (GameFinished
+        /// fires everywhere and _isTagged is replicated), so the local explosion Animator is
+        /// enough — no NetworkAnimator needed.
+        /// </summary>
         private void Explode()
         {
+            _explosionAnimator.SetTrigger(ExplodeHash);
+            _spriteRenderer.color = Color.gray;
+            _tagVisual.color = Color.gray;
         }
 
         // Owner-only: decide whether a jump is allowed right now and, if so, commit its
