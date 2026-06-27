@@ -78,7 +78,9 @@ games. The two naming styles currently coexist:
   id; the index is persisted (PlayerPrefs `PreferencesManager.playerColor_PlayerPrefKey`)
   and synced. Never reorder/remove entries.
 - **`SessionManager.StartMiniGame(E_MiniGame)`** / **`ReturnToLobby()`** — host-only
-  network scene loads. `GameDataRegistry` maps each `E_MiniGame` to its scene name.
+  network scene loads. `GameDataRegistry.GetMiniGameSceneName` derives the scene
+  name from the enum's int value, zero-padded to 3 digits (`MiniGame_001`,
+  `MiniGame_005`), so the scene file must be named to match.
 
 ### TagPlatformer (001) — reference implementation
 
@@ -105,10 +107,11 @@ games. The two naming styles currently coexist:
 
 1. Copy `Gameplay/001/` → `Gameplay/002/`, rename classes to `_002`. Subclass
    `MiniGameController` for the new game's rules.
-2. Build the minigame scene (`MiniGame_<Name>`), put the controller in it, wire
-   `UI_Timer` if you want the timer label.
-3. Add the enum value + scene constant + dictionary entry in
-   `E_MiniGame` / `GameDataRegistry`, and add the scene to Build Settings.
+2. Build the minigame scene named `MiniGame_002` (3-digit id, must match the enum
+   value), put the controller in it, wire `UI_Timer` if you want the timer label,
+   and add the scene to Build Settings.
+3. Add the enum value (e.g. `Foo = 002`) to `E_MiniGame` — the scene name is
+   derived from it automatically, no `GameDataRegistry` edit needed.
 4. Register the player prefab in the NGO network prefabs list.
 
 ## Conventions
