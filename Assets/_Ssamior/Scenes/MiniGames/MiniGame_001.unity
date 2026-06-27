@@ -2359,6 +2359,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Game.Controller_TagPlatformer
   ShowTopMostFoldoutHeaderGroup: 1
+  _showCursor: 0
+  _cursorTexture: {fileID: 0}
   _gameDuration: 45
   _returnToLobbyDelay: 5
   _playerPrefab: {fileID: 7829185358591424915, guid: 7584c4c608410ac42be88a828730736e, type: 3}

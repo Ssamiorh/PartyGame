@@ -17,4 +17,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/_Ssamior/Scenes/MiniGames/MiniGame_001.unity
     guid: 903ea7b1ac6d50446a74d2f9fa747899
+  - enabled: 1
+    path: Assets/_Ssamior/Scenes/MiniGames/MiniGame_002.unity
+    guid: 86f3cc8e2db429649a3d3b6841419247
   m_configObjects: {}

@@ -25,6 +25,10 @@ namespace Game.UI
 
         private void OnEnable()
         {
+            // Minigames may swap or hide the cursor; restore the default on every lobby load.
+            Cursor.visible = true;
+            Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto);
+
             if (SessionManager.Instance != null)
                 SessionManager.Instance.SessionChanged += HandleSessionChanged;
 

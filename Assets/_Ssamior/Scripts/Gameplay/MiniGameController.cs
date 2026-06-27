@@ -23,11 +23,20 @@ namespace Game
     /// </summary>
     public abstract class MiniGameController : NetworkBehaviour
     {
+        [Header("Cursor")]
+        [Tooltip("Whether the hardware cursor is visible during this minigame.")]
+        [SerializeField] protected bool _showCursor = true;
+
+        [Tooltip("Cursor texture to use when the cursor is shown. Leave empty to use the project's default cursor.")]
+        [SerializeField] protected Texture2D _cursorTexture;
+
+        [Header("Game parameters")]
         [Tooltip("Game length in seconds. Set to 0 (or less) for no timer: the game then ends only via FinishGame().")]
         [SerializeField] protected float _gameDuration = 60f;
 
         [Tooltip("Delay in seconds between the game finishing and returning to the lobby.")]
         [SerializeField] protected float _returnToLobbyDelay = 5f;
+
 
         // Server-authoritative game state, mirrored to every client.
         private readonly NetworkVariable<E_MiniGameState> _state = new(E_MiniGameState.WaitingForPlayers);
@@ -75,6 +84,8 @@ namespace Game
 
         public override void OnNetworkSpawn()
         {
+            ApplyCursor();
+
             _state.OnValueChanged += HandleStateChanged;
 
             if (IsServer)
@@ -87,6 +98,16 @@ namespace Game
 
             if (IsServer && NetworkManager != null && NetworkManager.SceneManager != null)
                 NetworkManager.SceneManager.OnLoadEventCompleted -= HandleLoadEventCompleted;
+        }
+
+        // Local-only: apply this minigame's cursor settings on every peer. A null
+        // texture reverts to the project's default cursor (Player Settings).
+        private void ApplyCursor()
+        {
+            Cursor.visible = _showCursor;
+
+            if (_showCursor)
+                Cursor.SetCursor(_cursorTexture, Vector2.zero, CursorMode.Auto);
         }
 
         // --- Server flow -------------------------------------------------------

@@ -168,7 +168,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ManagingScene
   _devLaunchMiniGame: 1
-  _devMiniGame: 1
+  _devMiniGame: 2
 --- !u!1 &554182797
 GameObject:
   m_ObjectHideFlags: 0
