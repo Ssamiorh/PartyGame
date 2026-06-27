@@ -174,4 +174,50 @@ namespace Game
         /// </summary>
         protected abstract void OnGameFinished();
     }
+
+    /// <summary>
+    /// Minigame manager that spawns and tracks a roster of <typeparamref name="T"/> players.
+    /// Owns the player prefab, spawn points, and the spawned-player list so each game only
+    /// writes its own rules on top of <see cref="SpawnPlayers"/>.
+    /// </summary>
+    public abstract class MiniGameController<T> : MiniGameController where T : PlayerController
+    {
+        [SerializeField] protected NetworkObject _playerPrefab;
+        [SerializeField] protected Transform[] _spawnPoints;
+
+        // Server-only: every spawned player.
+        protected readonly List<T> _players = new();
+
+        /// <summary>
+        /// Server-only: spawn one player per connected client at the configured spawn points,
+        /// owned by that client, and collect them into <see cref="_players"/>.
+        /// </summary>
+        protected void SpawnPlayers()
+        {
+            if (!IsServer)
+                return;
+
+            if (_playerPrefab == null || _spawnPoints == null || _spawnPoints.Length == 0)
+            {
+                Debug.LogError("Player prefab or spawn points are not assigned.", this);
+                return;
+            }
+
+            _players.Clear();
+
+            int index = 0;
+            foreach (ulong clientId in NetworkManager.ConnectedClientsIds)
+            {
+                Transform spawn = _spawnPoints[index % _spawnPoints.Length];
+                NetworkObject instantiatedPlayer = NetworkManager.SpawnManager.InstantiateAndSpawn(
+                    _playerPrefab, clientId, destroyWithScene: true,
+                    position: spawn.position, rotation: spawn.rotation);
+
+                if (instantiatedPlayer.TryGetComponent(out T player))
+                    _players.Add(player);
+
+                index++;
+            }
+        }
+    }
 }

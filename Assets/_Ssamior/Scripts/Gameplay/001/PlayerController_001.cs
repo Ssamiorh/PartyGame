@@ -12,7 +12,7 @@ namespace Game.TagPlatformer
     /// and is passed on by colliding with another player.
     /// </summary>
     [RequireComponent(typeof(Rigidbody2D))]
-    public class PlayerController_001 : NetworkBehaviour
+    public class PlayerController_001 : PlayerController
     {
         [SerializeField] private float _moveSpeed = 7f;
         [SerializeField] private float _jumpForce = 12f;
@@ -60,14 +60,8 @@ namespace Game.TagPlatformer
         // does not replicate SpriteRenderer.flipX).
         private readonly NetworkVariable<bool> _facingLeft = new(writePerm: NetworkVariableWritePermission.Owner);
 
-        // Owner-written color index (into PlayerColors), mirrored to every peer to tint
-        // this player's sprites with their lobby-picked color.
-        private readonly NetworkVariable<int> _colorIndex = new(writePerm: NetworkVariableWritePermission.Owner);
-
         // ServerTime until which this player cannot pass the tag on again. Server-only.
         private double _tagImmunityEndTime;
-
-        private MiniGameController _miniGame;
 
         public bool IsTagged => _isTagged.Value;
 
@@ -79,24 +73,15 @@ namespace Game.TagPlatformer
             _facingLeft.OnValueChanged += HandleFacingChanged;
             UpdateFacing(_facingLeft.Value);
 
-            _colorIndex.OnValueChanged += HandleColorChanged;
-            // Owner publishes its lobby-picked color; everyone (owner included) applies it.
-            if (IsOwner)
-                _colorIndex.Value = PlayerColors.Clamp(
-                    PlayerPrefs.GetInt(PreferencesManager.playerColor_PlayerPrefKey, 0));
-            ApplyColor(_colorIndex.Value);
-
-            _miniGame = FindAnyObjectByType<MiniGameController>();
-            _miniGame.GameFinished += HandleGameFinished;
+            base.OnNetworkSpawn();
         }
 
         public override void OnNetworkDespawn()
         {
             _isTagged.OnValueChanged -= HandleTaggedChanged;
             _facingLeft.OnValueChanged -= HandleFacingChanged;
-            _colorIndex.OnValueChanged -= HandleColorChanged;
 
-            _miniGame.GameFinished -= HandleGameFinished;
+            base.OnNetworkDespawn();
         }
 
         /// <summary>Server-only: mark this player as tagged or not.</summary>
@@ -124,9 +109,7 @@ namespace Game.TagPlatformer
             _spriteRenderer.flipX = !facingLeft;
         }
 
-        private void HandleColorChanged(int previous, int current) => ApplyColor(current);
-
-        private void ApplyColor(int colorIndex)
+        protected override void ApplyColor(int colorIndex)
         {
             Color color = PlayerColors.ColorAt(colorIndex);
             _spriteRenderer.color = color;
@@ -232,7 +215,7 @@ namespace Game.TagPlatformer
             target.SetTagged(true);
         }
 
-        private void HandleGameFinished()
+        protected override void HandleGameFinished()
         {
             // Timer is up: freeze inputs everywhere and blow up whoever is holding the tag.
             _inputsEnabled = false;
