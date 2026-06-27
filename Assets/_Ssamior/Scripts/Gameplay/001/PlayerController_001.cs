@@ -12,7 +12,7 @@ namespace Game.TagPlatformer
     /// and is passed on by colliding with another player.
     /// </summary>
     [RequireComponent(typeof(Rigidbody2D))]
-    public class PlayerController_TagPlatformer : NetworkBehaviour
+    public class PlayerController_001 : NetworkBehaviour
     {
         [SerializeField] private float _moveSpeed = 7f;
         [SerializeField] private float _jumpForce = 12f;
@@ -206,8 +206,8 @@ namespace Game.TagPlatformer
             if(collision.rigidbody == null)
                 return;
         
-            PlayerController_TagPlatformer other =
-                collision.collider.GetComponentInParent<PlayerController_TagPlatformer>();
+            PlayerController_001 other =
+                collision.collider.GetComponentInParent<PlayerController_001>();
             if (other == null || other == this)
                 return;
 
@@ -225,8 +225,7 @@ namespace Game.TagPlatformer
             if (!NetworkManager.SpawnManager.SpawnedObjects.TryGetValue(targetNetworkObjectId, out NetworkObject targetObject))
                 return;
 
-            PlayerController_TagPlatformer target = targetObject.GetComponent<PlayerController_TagPlatformer>();
-            if (target == null)
+            if (!targetObject.TryGetComponent<PlayerController_001>(out var target))
                 return;
 
             SetTagged(false);

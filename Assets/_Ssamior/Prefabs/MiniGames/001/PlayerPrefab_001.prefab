@@ -598,7 +598,7 @@ GameObject:
   - component: {fileID: 6254168876215976099}
   - component: {fileID: 2348887240691475766}
   m_Layer: 6
-  m_Name: PlayerPrefab_TagPlatformer
+  m_Name: PlayerPrefab_001
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

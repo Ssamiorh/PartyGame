@@ -11,7 +11,7 @@ namespace Game
         [SerializeField] private Transform[] _spawnPoints;
 
         // Server-only: every spawned player, used to pick the first one to be "it".
-        private readonly List<PlayerController_TagPlatformer> _players = new();
+        private readonly List<PlayerController_001> _players = new();
 
         protected override void OnGameStarted()
         {
@@ -36,7 +36,7 @@ namespace Game
                     _playerPrefab, clientId, destroyWithScene: true,
                     position: spawn.position, rotation: spawn.rotation);
 
-                if (instantiatedPlayer.TryGetComponent(out PlayerController_TagPlatformer player))
+                if (instantiatedPlayer.TryGetComponent(out PlayerController_001 player))
                     _players.Add(player);
 
                 index++;

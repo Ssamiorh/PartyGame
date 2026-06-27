@@ -89,7 +89,7 @@ AnimatorController:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: PlayerAnimator_TagPlatformer
+  m_Name: PlayerAnimator_001
   serializedVersion: 6
   m_AnimatorParameters:
   - m_Name: Speed
