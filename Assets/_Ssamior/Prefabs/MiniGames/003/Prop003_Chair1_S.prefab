@@ -8,6 +8,18 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 860687780498849954, guid: 4e58727ff2db53043b894681b42a3ad6, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 1792310881, guid: 644664fb9391897469d59e2b77dc6d21, type: 3}
+    - target: {fileID: 1055467699096790921, guid: 4e58727ff2db53043b894681b42a3ad6, type: 3}
+      propertyPath: _propType
+      value: 103
+      objectReference: {fileID: 0}
+    - target: {fileID: 1513532384536339628, guid: 4e58727ff2db53043b894681b42a3ad6, type: 3}
+      propertyPath: m_Name
+      value: Prop003_Chair1_S
+      objectReference: {fileID: 0}
     - target: {fileID: 2468256875506035509, guid: 4e58727ff2db53043b894681b42a3ad6, type: 3}
       propertyPath: m_Name
       value: Prop003_Chair1_S
@@ -16,6 +28,10 @@ PrefabInstance:
       propertyPath: m_Sprite
       value: 
       objectReference: {fileID: 1792310881, guid: 644664fb9391897469d59e2b77dc6d21, type: 3}
+    - target: {fileID: 5612042792911406721, guid: 4e58727ff2db53043b894681b42a3ad6, type: 3}
+      propertyPath: GlobalObjectIdHash
+      value: 654010839
+      objectReference: {fileID: 0}
     - target: {fileID: 6529763464687392817, guid: 4e58727ff2db53043b894681b42a3ad6, type: 3}
       propertyPath: _propType
       value: 103

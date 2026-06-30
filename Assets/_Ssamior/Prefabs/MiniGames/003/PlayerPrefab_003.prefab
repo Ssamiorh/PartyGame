@@ -286,8 +286,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Game.OfficeGame.PlayerController_003
   ShowTopMostFoldoutHeaderGroup: 1
   _moveSpeed: 5
+  _acceleration: 25
   _rb: {fileID: 8825525548367980756}
   _spriteRenderer: {fileID: 861673791710032651}
+  _propLayers:
+    serializedVersion: 2
+    m_Bits: 128
+  _claimLookAhead: 0.6
+  _claimRadius: 0.5
 --- !u!114 &6254168876215976099
 MonoBehaviour:
   m_ObjectHideFlags: 0

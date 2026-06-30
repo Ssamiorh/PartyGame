@@ -8,6 +8,26 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 68086249630707000, guid: 6e1b47bda7266724f98134ead88bae4f, type: 3}
+      propertyPath: _propType
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 406982764519541267, guid: 6e1b47bda7266724f98134ead88bae4f, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: -347182505, guid: 644664fb9391897469d59e2b77dc6d21, type: 3}
+    - target: {fileID: 1969489198064152093, guid: 6e1b47bda7266724f98134ead88bae4f, type: 3}
+      propertyPath: m_Name
+      value: Prop003_CardboardBoxMedium
+      objectReference: {fileID: 0}
+    - target: {fileID: 2079671852832307507, guid: 6e1b47bda7266724f98134ead88bae4f, type: 3}
+      propertyPath: m_Size.y
+      value: 0.15
+      objectReference: {fileID: 0}
+    - target: {fileID: 2079671852832307507, guid: 6e1b47bda7266724f98134ead88bae4f, type: 3}
+      propertyPath: m_SpriteTilingProperty.oldSize.y
+      value: 0.15
+      objectReference: {fileID: 0}
     - target: {fileID: 2468256875506035509, guid: 6e1b47bda7266724f98134ead88bae4f, type: 3}
       propertyPath: m_Name
       value: Prop003_CardboardBoxMedium
@@ -20,6 +40,10 @@ PrefabInstance:
       propertyPath: m_Sprite
       value: 
       objectReference: {fileID: -347182505, guid: 644664fb9391897469d59e2b77dc6d21, type: 3}
+    - target: {fileID: 4879044903294012464, guid: 6e1b47bda7266724f98134ead88bae4f, type: 3}
+      propertyPath: GlobalObjectIdHash
+      value: 2972000523
+      objectReference: {fileID: 0}
     - target: {fileID: 7805776042287200235, guid: 6e1b47bda7266724f98134ead88bae4f, type: 3}
       propertyPath: m_Size.y
       value: 0.15

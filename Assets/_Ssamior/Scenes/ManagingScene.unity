@@ -167,7 +167,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 31232e15c060d5844a4b5e9281dc56da, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ManagingScene
-  _devLaunchMiniGame: 1
+  _devLaunchMiniGame: 0
   _devMiniGame: 3
 --- !u!1 &554182797
 GameObject:
