@@ -14,6 +14,9 @@ namespace Game
         // this player's sprites with their lobby-picked color.
         private readonly NetworkVariable<int> _colorIndex = new(writePerm: NetworkVariableWritePermission.Owner);
 
+        /// <summary>This player's lobby color index (into PlayerColors), synced to every peer.</summary>
+        protected int ColorIndex => _colorIndex.Value;
+
         private MiniGameController _miniGame;
 
         public override void OnNetworkSpawn()

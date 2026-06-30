@@ -6,6 +6,7 @@ namespace Game
     {
         TagPlatformer = 001,
         TankShooter = 002,
+        OfficeGame = 003,
     }
 
 }

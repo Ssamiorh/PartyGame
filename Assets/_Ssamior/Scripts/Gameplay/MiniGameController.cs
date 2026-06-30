@@ -107,7 +107,15 @@ namespace Game
             Cursor.visible = _showCursor;
 
             if (_showCursor)
-                Cursor.SetCursor(_cursorTexture, Vector2.zero, CursorMode.Auto);
+            {
+                // Center the hotspot on the texture so the aim point is the crosshair's middle, not
+                // its top-left corner (otherwise shots land offset by half the cursor size). A null
+                // texture reverts to the default cursor, where the hotspot is ignored.
+                Vector2 hotspot = _cursorTexture != null
+                    ? new Vector2(_cursorTexture.width, _cursorTexture.height) * 0.5f
+                    : Vector2.zero;
+                Cursor.SetCursor(_cursorTexture, hotspot, CursorMode.Auto);
+            }
         }
 
         // --- Server flow -------------------------------------------------------

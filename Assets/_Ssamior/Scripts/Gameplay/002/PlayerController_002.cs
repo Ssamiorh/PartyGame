@@ -28,6 +28,15 @@ namespace Game.TankShooter
         [Tooltip("Turret rotation speed, in degrees/second, toward the mouse pointer.")]
         [SerializeField] private float _turretRotationSpeed = 240f;
 
+        [Header("Shooting")]
+        [Tooltip("Muzzle at the cannon tip; bullets spawn here and fly toward the cursor. Place it " +
+                 "clear of the tank's own collider so a shot does not detonate on the shooter.")]
+        [SerializeField] private Transform _muzzle;
+        [Tooltip("Minimum delay between two shots, in seconds.")]
+        [SerializeField] private float _fireCooldown = 0.4f;
+        [Tooltip("Max angle, in degrees, between the turret and the shot direction for the cannon to fire.")]
+        [SerializeField] private float _aimTolerance = 5f;
+
         [Header("References")]
         [SerializeField] private Rigidbody2D _rb;
         [Tooltip("Chassis/frame transform that rotates toward the movement direction.")]
@@ -46,6 +55,9 @@ namespace Game.TankShooter
         private float _throttle;
         private bool _inputsEnabled = true;
         private Camera _camera;
+
+        // Owner-only: earliest Time.time a new shot is allowed (fire cooldown).
+        private float _nextFireTime;
 
         // Smallest angle change worth replicating, to avoid flooding the network every frame.
         private const float AngleSyncThreshold = 0.25f;
@@ -103,10 +115,40 @@ namespace Game.TankShooter
                     float targetTurretAngle = Vector2.SignedAngle(Vector2.up, toPointer);
                     _turretAngle = Mathf.MoveTowardsAngle(_turretAngle, targetTurretAngle, _turretRotationSpeed * Time.deltaTime);
                 }
+
+                TryShoot();
             }
             ApplyTurretAngle(_turretAngle);
 
             ReplicateAngles();
+        }
+
+        // Owner-only: while Space is held, fire from the muzzle toward the cursor, paced by the
+        // cooldown and only once the turret has rotated to face the shot direction.
+        private void TryShoot()
+        {
+            if (!Input.GetKey(KeyCode.Space) || Time.time < _nextFireTime)
+                return;
+
+            Vector2 muzzlePos = _muzzle.position;
+            Vector2 toPointer = (Vector2)_camera.ScreenToWorldPoint(Input.mousePosition) - muzzlePos;
+            if (toPointer.sqrMagnitude < 0.0001f)
+                return;
+
+            // Hold fire until the turret is aligned with the shot direction.
+            float shotAngle = Vector2.SignedAngle(Vector2.up, toPointer);
+            if (Mathf.Abs(Mathf.DeltaAngle(_turretAngle, shotAngle)) > _aimTolerance)
+                return;
+
+            _nextFireTime = Time.time + _fireCooldown;
+            ShootServerRpc(muzzlePos, toPointer.normalized);
+        }
+
+        // Server spawns the networked bullet from the shared pool; it replicates to every peer.
+        [ServerRpc]
+        private void ShootServerRpc(Vector2 position, Vector2 direction)
+        {
+            BulletPooling_002.Instance.Spawn(position, direction, ColorIndex, NetworkObjectId);
         }
 
         private void FixedUpdate()
